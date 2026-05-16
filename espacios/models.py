@@ -4,9 +4,9 @@ from django.urls import reverse
 # Create your models here.
 
 class TipoEspacio(models.Model):
-    nombre = models.CharField(max_lenght=50, unique=True)
+    nombre = models.CharField(max_length=50, unique=True)
     descripcion = models.TextField(blank=True)
-    icono = models.CharField(max_lenght=50, default='bi-building', help_text='Clase de Bootstrap Icons')
+    icono = models.CharField(max_length=50, default='bi-building', help_text='Clase de Bootstrap Icons')
 
     def __str__(self):
         return self.nombre
@@ -23,13 +23,14 @@ class Espacio(models.Model):
         ('inactivo', 'Inactivo'),
     ]
 
-    codigo = models.CharField(max_lenght=20, unique=True, help_text='Ej: AULA-101, LAB-205')
-    nombre = models.CharField(max_lenght=100)
+    codigo = models.CharField(max_length=20, unique=True, help_text='Ej: AULA-101, LAB-205')
+    nombre = models.CharField(max_length=100)
     tipo = models.ForeignKey(TipoEspacio, on_delete=models.PROTECT, related_name='espacios')
     capacidad = models.PositiveIntegerField()
+    ubicacion = models.CharField(max_length=150, help_text='Ej: Bloque A, Piso 2')
     descripcion = models.TextField(blank=True)
     equipamiento = models.TextField(blank=True, help_text='Recursos Disponibles')
-    estado = models.CharField(max_lenght=20, choices=ESTADOS, default='disponible')
+    estado = models.CharField(max_length=20, choices=ESTADOS, default='disponible')
     foto = models.ImageField(upload_to='espacios/', blank=True, null=True)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
 
