@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ espacio.nombre }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        {% if espacio.foto %}
+            <img src="{{ espacio.foto.url }}" class="img-fluid rounded mb-3">
+        {% else %}
+            <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 300px;">
+                <i class="{{ espacio.tipo.icono }}" style="font-size: 6rem; color: #aaa;"></i>
+            </div>
+        {% endif %}
+    </div>
+    <div class="col-md-6">
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <span class="badge bg-secondary">{{ espacio.codigo }}</span>
+                <span class="badge bg-info">{{ espacio.tipo.nombre }}</span>
+                <h3 class="mt-2">{{ espacio.nombre }}</h3>
+            </div>
+            {% if user.perfil.rol in 'admin,operador' %}
+            <div>
+                <a href="{% url 'espacios:editar' espacio.pk %}" class="btn btn-warning btn-sm">
+                    <i class="bi bi-pencil"></i>
+                </a>
+                {% if user.perfil.rol == 'admin' %}
+                <a href="{% url 'espacios:eliminar' espacio.pk %}" class="btn btn-danger btn-sm">
+                    <i class="bi bi-trash"></i>
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+        
+        <table class="table table-sm mt-3">
+            <tr><th><i class="bi bi-geo-alt"></i> Ubicación</th><td>{{ espacio.ubicacion }}</td></tr>
+            <tr><th><i class="bi bi-people"></i> Capacidad</th><td>{{ espacio.capacidad }} personas</td></tr>
+            <tr><th><i class="bi bi-info-circle"></i> Estado</th>
+                <td>
+                    {% if espacio.estado == 'disponible' %}
+                        <span class="badge bg-success">Disponible</span>
+                    {% elif espacio.estado == 'mantenimiento' %}
+                        <span class="badge bg-warning">Mantenimiento</span>
+                    {% else %}
+                        <span class="badge bg-danger">Inactivo</span>
+                    {% endif %}
+                </td>
+            </tr>
+        </table>
+        
+        {% if espacio.descripcion %}
+        <h6>Descripción</h6>
+        <p>{{ espacio.descripcion }}</p>
+        {% endif %}
+        
+        {% if espacio.equipamiento %}
+        <h6>Equipamiento</h6>
+        <p>{{ espacio.equipamiento|linebreaks }}</p>
+        {% endif %}
+        
+        {% if espacio.estado == 'disponible' %}
+        <a href="{% url 'reservas:crear' %}?espacio={{ espacio.pk }}" class="btn btn-primary mt-3">
+            <i class="bi bi-calendar-plus"></i> Reservar este espacio
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<hr>
+
+<h5><i class="bi bi-clock-history"></i> Reservas recientes</h5>
+{% if reservas_recientes %}
+<table class="table">
+    <thead>
+        <tr>
+            <th>Usuario</th>
+            <th>Fecha</th>
+            <th>Horario</th>
+            <th>Estado</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for r in reservas_recientes %}
+        <tr>
+            <td>{{ r.usuario.get_full_name|default:r.usuario.username }}</td>
+            <td>{{ r.fecha }}</td>
+            <td>{{ r.hora_inicio }} - {{ r.hora_fin }}</td>
+            <td>{{ r.get_estado_display }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p class="text-muted">No hay reservas recientes para este espacio.</p>
+{% endif %}
+{% endblock %}
