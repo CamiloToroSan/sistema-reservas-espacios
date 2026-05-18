@@ -1,0 +1,395 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Panel de Control{% endblock %}
+
+{% block content %}
+
+<!-- Encabezado -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>
+        <i class="bi bi-speedometer2 text-primary"></i> 
+        Panel de Control
+    </h2>
+    <span class="text-muted">
+        <i class="bi bi-calendar3"></i> 
+        {% now "l, d F Y" %}
+    </span>
+</div>
+
+<!-- ===================================================== -->
+<!-- SECCIÓN 1: KPIs (Indicadores Clave)                    -->
+<!-- ===================================================== -->
+<div class="row mb-4">
+    <!-- Total de espacios -->
+    <div class="col-md-3 mb-3">
+        <div class="card text-center h-100 border-primary">
+            <div class="card-body">
+                <i class="bi bi-building text-primary" style="font-size: 2.5rem;"></i>
+                <h2 class="text-primary mt-2 mb-0">{{ total_espacios }}</h2>
+                <p class="text-muted mb-0">Espacios totales</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Total de reservas -->
+    <div class="col-md-3 mb-3">
+        <div class="card text-center h-100 border-success">
+            <div class="card-body">
+                <i class="bi bi-calendar-check text-success" style="font-size: 2.5rem;"></i>
+                <h2 class="text-success mt-2 mb-0">{{ total_reservas }}</h2>
+                <p class="text-muted mb-0">Reservas totales</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Reservas pendientes -->
+    <div class="col-md-3 mb-3">
+        <div class="card text-center h-100 border-warning">
+            <div class="card-body">
+                <i class="bi bi-hourglass-split text-warning" style="font-size: 2.5rem;"></i>
+                <h2 class="text-warning mt-2 mb-0">{{ reservas_pendientes }}</h2>
+                <p class="text-muted mb-0">Pendientes</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Reservas de hoy -->
+    <div class="col-md-3 mb-3">
+        <div class="card text-center h-100 border-info">
+            <div class="card-body">
+                <i class="bi bi-calendar-day text-info" style="font-size: 2.5rem;"></i>
+                <h2 class="text-info mt-2 mb-0">{{ reservas_hoy }}</h2>
+                <p class="text-muted mb-0">Reservas hoy</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===================================================== -->
+<!-- SECCIÓN 2: Mis próximas reservas (solo no-admin)     -->
+<!-- ===================================================== -->
+{% if mis_reservas is not None %}
+<div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">
+            <i class="bi bi-calendar-event"></i> 
+            Mis próximas reservas
+        </h5>
+    </div>
+    <div class="card-body">
+        {% if mis_reservas %}
+        <div class="list-group">
+            {% for r in mis_reservas %}
+            <div class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    <strong>{{ r.espacio.nombre }}</strong>
+                    <span class="badge bg-secondary ms-2">{{ r.espacio.codigo }}</span>
+                    <br>
+                    <small class="text-muted">
+                        <i class="bi bi-calendar3"></i> {{ r.fecha|date:"d/m/Y" }}
+                        <i class="bi bi-clock ms-2"></i> {{ r.hora_inicio }} - {{ r.hora_fin }}
+                    </small>
+                    <br>
+                    <small>{{ r.motivo }}</small>
+                </div>
+                <div>
+                    <span class="badge bg-{% if r.estado == 'confirmada' %}success{% elif r.estado == 'pendiente' %}warning{% else %}secondary{% endif %}">
+                        {{ r.get_estado_display }}
+                    </span>
+                    <a href="{% url 'reservas:detalle' r.pk %}" class="btn btn-sm btn-outline-primary ms-2">
+                        <i class="bi bi-eye"></i>
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-muted text-center mb-0">
+            <i class="bi bi-inbox" style="font-size: 2rem;"></i><br>
+            No tienes reservas próximas.
+            <a href="{% url 'reservas:crear' %}" class="btn btn-primary btn-sm ms-2">
+                <i class="bi bi-plus-circle"></i> Crear reserva
+            </a>
+        </p>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+<!-- ===================================================== -->
+<!-- SECCIÓN 3: GRÁFICOS ESTADÍSTICOS                      -->
+<!-- ===================================================== -->
+<div class="row">
+    <!-- Gráfico 1: Reservas por mes (LÍNEA) -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <i class="bi bi-graph-up text-primary"></i>
+                <strong>Reservas por mes (últimos 6 meses)</strong>
+            </div>
+            <div class="card-body">
+                <canvas id="graficoMeses" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Gráfico 2: Top 5 espacios (BARRAS) -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <i class="bi bi-trophy text-success"></i>
+                <strong>Top 5 espacios más usados</strong>
+            </div>
+            <div class="card-body">
+                <canvas id="graficoTopEspacios" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Gráfico 3: Distribución por tipo (DONA) -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <i class="bi bi-pie-chart text-warning"></i>
+                <strong>Distribución por tipo de espacio</strong>
+            </div>
+            <div class="card-body">
+                <canvas id="graficoTipos" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Gráfico 4: Ocupación semanal (BARRAS) -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <i class="bi bi-calendar-week text-info"></i>
+                <strong>Ocupación de la semana actual</strong>
+            </div>
+            <div class="card-body">
+                <canvas id="graficoSemanal" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===================================================== -->
+<!-- SECCIÓN 4: Actividad reciente                         -->
+<!-- ===================================================== -->
+<div class="card">
+    <div class="card-header">
+        <i class="bi bi-clock-history text-secondary"></i>
+        <strong>Actividad reciente</strong>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Usuario</th>
+                        <th>Espacio</th>
+                        <th>Fecha</th>
+                        <th>Horario</th>
+                        <th>Estado</th>
+                        <th>Creada</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in actividad_reciente %}
+                    <tr>
+                        <td>
+                            <i class="bi bi-person-circle"></i>
+                            {{ r.usuario.get_full_name|default:r.usuario.username }}
+                        </td>
+                        <td>
+                            <span class="badge bg-secondary">{{ r.espacio.codigo }}</span>
+                            {{ r.espacio.nombre }}
+                        </td>
+                        <td>{{ r.fecha|date:"d/m/Y" }}</td>
+                        <td>{{ r.hora_inicio }} - {{ r.hora_fin }}</td>
+                        <td>
+                            {% if r.estado == 'confirmada' %}
+                                <span class="badge bg-success">Confirmada</span>
+                            {% elif r.estado == 'pendiente' %}
+                                <span class="badge bg-warning">Pendiente</span>
+                            {% elif r.estado == 'cancelada' %}
+                                <span class="badge bg-danger">Cancelada</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ r.get_estado_display }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <small class="text-muted">{{ r.creada_en|date:"d/m/Y H:i" }}</small>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">
+                            <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                            <p class="mt-2">No hay actividad reciente registrada.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+<!-- ===================================================== -->
+<!-- SCRIPTS DE GRÁFICOS (Chart.js)                        -->
+<!-- ===================================================== -->
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+// ─── GRÁFICO 1: Reservas por mes (Línea) ───
+const ctx1 = document.getElementById('graficoMeses').getContext('2d');
+new Chart(ctx1, {
+    type: 'line',
+    data: {
+        labels: {{ labels_meses|safe }},
+        datasets: [{
+            label: 'Reservas',
+            data: {{ data_meses|safe }},
+            borderColor: '#0d6efd',
+            backgroundColor: 'rgba(13, 110, 253, 0.1)',
+            borderWidth: 2,
+            tension: 0.4,  // Suaviza la línea
+            fill: true,
+            pointBackgroundColor: '#0d6efd',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 5
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                display: false  // Ocultar leyenda (solo hay un dataset)
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1  // Solo números enteros
+                }
+            }
+        }
+    }
+});
+
+// ─── GRÁFICO 2: Top 5 espacios (Barras horizontales) ───
+const ctx2 = document.getElementById('graficoTopEspacios').getContext('2d');
+new Chart(ctx2, {
+    type: 'bar',
+    data: {
+        labels: {{ labels_top|safe }},
+        datasets: [{
+            label: 'Total de reservas',
+            data: {{ data_top|safe }},
+            backgroundColor: [
+                'rgba(25, 135, 84, 0.8)',
+                'rgba(25, 135, 84, 0.7)',
+                'rgba(25, 135, 84, 0.6)',
+                'rgba(25, 135, 84, 0.5)',
+                'rgba(25, 135, 84, 0.4)',
+            ],
+            borderColor: '#198754',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        indexAxis: 'y',  // Barras horizontales
+        responsive: true,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            x: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1
+                }
+            }
+        }
+    }
+});
+
+// ─── GRÁFICO 3: Distribución por tipo (Dona) ───
+const ctx3 = document.getElementById('graficoTipos').getContext('2d');
+new Chart(ctx3, {
+    type: 'doughnut',
+    data: {
+        labels: {{ labels_tipos|safe }},
+        datasets: [{
+            data: {{ data_tipos|safe }},
+            backgroundColor: [
+                '#0d6efd',  // Azul
+                '#198754',  // Verde
+                '#ffc107',  // Amarillo
+                '#dc3545',  // Rojo
+                '#6f42c1',  // Púrpura
+                '#fd7e14',  // Naranja
+                '#20c997',  // Verde agua
+            ],
+            borderWidth: 2,
+            borderColor: '#fff'
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+
+// ─── GRÁFICO 4: Ocupación semanal (Barras) ───
+const ctx4 = document.getElementById('graficoSemanal').getContext('2d');
+new Chart(ctx4, {
+    type: 'bar',
+    data: {
+        labels: {{ labels_dias|safe }},
+        datasets: [{
+            label: 'Reservas confirmadas',
+            data: {{ data_semana|safe }},
+            backgroundColor: [
+                'rgba(13, 202, 240, 0.7)',
+                'rgba(13, 202, 240, 0.7)',
+                'rgba(13, 202, 240, 0.7)',
+                'rgba(13, 202, 240, 0.7)',
+                'rgba(13, 202, 240, 0.7)',
+                'rgba(108, 117, 125, 0.5)',
+                'rgba(108, 117, 125, 0.5)',
+            ],
+            borderColor: '#0dcaf0',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1
+                }
+            }
+        }
+    }
+});
+</script>
+{% endblock %}
