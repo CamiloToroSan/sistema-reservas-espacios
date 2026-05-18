@@ -1,0 +1,62 @@
+{% load static %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'dashboard:inicio' %}">
+            <i class="bi bi-calendar-check"></i> Reservas
+        </a>
+        <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#nav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="nav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'dashboard:inicio' %}">
+                        <i class="bi bi-speedometer2"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'espacios:lista' %}">
+                        <i class="bi bi-building"></i> Espacios
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'reservas:lista' %}">
+                        <i class="bi bi-calendar-week"></i> Reservas
+                    </a>
+                </li>
+                {% if user.perfil.rol == 'admin' %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'dashboard:reportes' %}">
+                        <i class="bi bi-file-earmark-bar-graph"></i> Reportes
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+            <ul class="navbar-nav">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+                        <i class="bi bi-person-circle"></i> 
+                        {{ user.get_full_name|default:user.username }}
+                        <span class="badge badge-rol-{{ user.perfil.rol }}">
+                            {{ user.perfil.get_rol_display }}
+                        </span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="{% url 'usuarios:perfil' %}">
+                            <i class="bi bi-person"></i> Mi perfil
+                        </a></li>
+                        {% if user.is_superuser %}
+                        <li><a class="dropdown-item" href="/admin/">
+                            <i class="bi bi-gear"></i> Admin Django
+                        </a></li>
+                        {% endif %}
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="{% url 'usuarios:logout' %}">
+                            <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+                        </a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>

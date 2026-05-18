@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Mi perfil{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="bi bi-person-circle"></i> Mi perfil</h4>
+            </div>
+            <div class="card-body p-4">
+                <div class="row mb-4">
+                    <div class="col-md-4 text-center">
+                        {% if user.perfil.foto %}
+                            <img src="{{ user.perfil.foto.url }}" class="rounded-circle" style="width: 120px; height: 120px; object-fit: cover;">
+                        {% else %}
+                            <i class="bi bi-person-circle" style="font-size: 7rem; color: #ccc;"></i>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-8">
+                        <h5>{{ user.get_full_name }}</h5>
+                        <p class="text-muted mb-1">{{ user.email }}</p>
+                        <span class="badge badge-rol-{{ user.perfil.rol }}">
+                            {{ user.perfil.get_rol_display }}
+                        </span>
+                    </div>
+                </div>
+                
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Teléfono</label>
+                        {{ form.telefono }}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Documento</label>
+                        {{ form.documento }}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Foto</label>
+                        {{ form.foto }}
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> Actualizar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
