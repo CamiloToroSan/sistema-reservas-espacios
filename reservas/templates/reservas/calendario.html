@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}Calendario{% endblock %}
+
+{% block content %}
+<h2><i class="bi bi-calendar-week"></i> Calendario semanal</h2>
+<p class="text-muted">Semana del {{ inicio_semana }} al {{ fin_semana }}</p>
+
+<div class="row">
+    {% for dia in dias %}
+    <div class="col-md mb-3">
+        <div class="card h-100">
+            <div class="card-header bg-primary text-white text-center">
+                <strong>{{ dia.fecha|date:"l" }}</strong><br>
+                <small>{{ dia.fecha|date:"d M" }}</small>
+            </div>
+            <div class="card-body" style="min-height: 200px;">
+                {% for r in dia.reservas %}
+                <div class="border-start border-success border-3 ps-2 mb-2 small">
+                    <strong>{{ r.hora_inicio }}-{{ r.hora_fin }}</strong><br>
+                    {{ r.espacio.codigo }}<br>
+                    <span class="text-muted">{{ r.motivo|truncatechars:20 }}</span>
+                </div>
+                {% empty %}
+                <p class="text-muted small text-center">Sin reservas</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
