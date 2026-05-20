@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalle de Reserva #{{ reserva.pk }}{% endblock %}
+
+{% block content %}
+
+<!-- Encabezado -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>
+        <i class="bi bi-calendar-check text-primary"></i>
+        Reserva #{{ reserva.pk }}
+    </h2>
+    <div>
+        <a href="{% url 'reservas:lista' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Volver al listado
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Detalle de la reserva -->
+    <div class="col-lg-8 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <strong><i class="bi bi-info-circle"></i> Información de la reserva</strong>
+                <span class="badge bg-{% if reserva.estado == 'confirmada' %}success{% elif reserva.estado == 'pendiente' %}warning text-dark{% elif reserva.estado == 'cancelada' %}danger{% else %}info{% endif %} fs-6">
+                    {{ reserva.get_estado_display|default:reserva.estado }}
+                </span>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-sm-4 text-muted"><i class="bi bi-building"></i> Espacio</div>
+                    <div class="col-sm-8">
+                        <strong>{{ reserva.espacio.nombre|default:"---" }}</strong>
+                        <span class="badge bg-secondary ms-1">{{ reserva.espacio.codigo|default:"---" }}</span>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4 text-muted"><i class="bi bi-geo-alt"></i> Ubicación</div>
+                    <div class="col-sm-8">{{ reserva.espacio.ubicacion|default:"---" }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4 text-muted"><i class="bi bi-calendar3"></i> Fecha</div>
+                    <div class="col-sm-8">{{ reserva.fecha|date:"l, d F Y" }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4 text-muted"><i class="bi bi-clock"></i> Horario</div>
+                    <div class="col-sm-8">{{ reserva.hora_inicio|default:"--:--" }} - {{ reserva.hora_fin|default:"--:--" }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4 text-muted"><i class="bi bi-people"></i> Asistentes</div>
+                    <div class="col-sm-8">{{ reserva.asistentes|default:1 }} / {{ reserva.espacio.capacidad|default:"?" }} (capacidad)</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4 text-muted"><i class="bi bi-chat-left-text"></i> Motivo</div>
+                    <div class="col-sm-8">{{ reserva.motivo|default:"Sin motivo" }}</div>
+                </div>
+                {% if reserva.descripcion %}
+                <div class="row mb-3">
+                    <div class="col-sm-4 text-muted"><i class="bi bi-card-text"></i> Descripción</div>
+                    <div class="col-sm-8">{{ reserva.descripcion|linebreaks }}</div>
+                </div>
+                {% endif %}
+                <hr>
+                <div class="row">
+                    <div class="col-sm-4 text-muted"><i class="bi bi-person"></i> Solicitante</div>
+                    <div class="col-sm-8">
+                        {{ reserva.usuario.get_full_name|default:reserva.usuario.username }}
+                        <span class="badge bg-light text-dark border">{{ reserva.usuario.email|default:"Sin email" }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Historial -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <strong><i class="bi bi-clock-history"></i> Historial de cambios</strong>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Acción</th>
+                                <th>Usuario</th>
+                                <th>Comentario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for h in historial %}
+                            <tr>
+                                <td><small class="text-muted">{{ h.fecha|date:"d/m/Y H:i" }}</small></td>
+                                <td>
+                                    <span class="badge bg-{% if h.accion == 'creada' %}primary{% elif h.accion == 'confirmada' %}success{% elif h.accion == 'cancelada' %}danger{% elif h.accion == 'modificada' %}warning text-dark{% else %}secondary{% endif %}">
+                                        {{ h.get_accion_display|default:h.accion }}
+                                    </span>
+                                </td>
+                                <td>{{ h.usuario.get_full_name|default:h.usuario.username|default:"Sistema" }}</td>
+                                <td>{{ h.comentario|default:"-"|truncatechars:50 }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-3">Sin historial registrado.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Acciones -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <strong><i class="bi bi-sliders"></i> Acciones</strong>
+            </div>
+            <div class="card-body d-grid gap-2">
+                {% if reserva.estado != 'cancelada' and reserva.estado != 'completada' %}
+                    {% if reserva.usuario == user or user.perfil.rol == 'admin' or user.perfil.rol == 'operador' %}
+                        <a href="{% url 'reservas:editar' reserva.pk %}" class="btn btn-outline-primary">
+                            <i class="bi bi-pencil"></i> Editar reserva
+                        </a>
+                    {% endif %}
+                {% endif %}
+
+                {% if reserva.estado == 'pendiente' %}
+                    {% if user.perfil.rol == 'admin' or user.perfil.rol == 'operador' %}
+                        <a href="{% url 'reservas:confirmar' reserva.pk %}" class="btn btn-success">
+                            <i class="bi bi-check-lg"></i> Confirmar reserva
+                        </a>
+                    {% endif %}
+                {% endif %}
+
+                {% if reserva.estado == 'pendiente' or reserva.estado == 'confirmada' %}
+                    {% if reserva.usuario == user or user.perfil.rol == 'admin' or user.perfil.rol == 'operador' %}
+                        <a href="{% url 'reservas:cancelar' reserva.pk %}" class="btn btn-danger">
+                            <i class="bi bi-x-lg"></i> Cancelar reserva
+                        </a>
+                    {% endif %}
+                {% endif %}
+
+                {% if reserva.estado == 'cancelada' or reserva.estado == 'completada' %}
+                    <button class="btn btn-outline-secondary" disabled>
+                        <i class="bi bi-lock"></i> Sin acciones disponibles
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
