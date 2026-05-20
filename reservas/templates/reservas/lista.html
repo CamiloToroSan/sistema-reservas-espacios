@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+
+{% block title %}Mis Reservas{% endblock %}
+
+{% block content %}
+
+<!-- Encabezado -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-calendar-week text-primary"></i> Reservas</h2>
+    <a href="{% url 'reservas:crear' %}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Nueva reserva
+    </a>
+</div>
+
+<!-- Filtros -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" name="q" class="form-control" placeholder="Buscar..."
+                           value="{{ busqueda|default:'' }}">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select name="estado" class="form-select">
+                    <option value="">-- Todos los estados --</option>
+                    <option value="pendiente" {% if estado_seleccionado == 'pendiente' %}selected{% endif %}>Pendiente</option>
+                    <option value="confirmada" {% if estado_seleccionado == 'confirmada' %}selected{% endif %}>Confirmada</option>
+                    <option value="cancelada" {% if estado_seleccionado == 'cancelada' %}selected{% endif %}>Cancelada</option>
+                    <option value="completada" {% if estado_seleccionado == 'completada' %}selected{% endif %}>Completada</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-outline-primary">
+                    <i class="bi bi-funnel"></i> Filtrar
+                </button>
+                <a href="{% url 'reservas:lista' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-circle"></i> Limpiar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Tabla de reservas -->
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0 align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>ID</th>
+                    <th>Espacio</th>
+                    <th>Fecha</th>
+                    <th>Horario</th>
+                    <th>Motivo</th>
+                    <th>Estado</th>
+                    <th class="text-end">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in reservas %}
+                <tr>
+                    <td><span class="badge bg-secondary">#{{ r.pk }}</span></td>
+                    <td>
+                        <strong>{{ r.espacio.nombre|default:"---" }}</strong><br>
+                        <small class="text-muted">{{ r.espacio.codigo|default:"---" }}</small>
+                    </td>
+                    <td>{{ r.fecha|date:"d/m/Y" }}</td>
+                    <td>{{ r.hora_inicio|default:"--:--" }} - {{ r.hora_fin|default:"--:--" }}</td>
+                    <td>{{ r.motivo|default:"Sin motivo"|truncatechars:30 }}</td>
+                    <td>
+                        {% if r.estado == 'confirmada' %}
+                            <span class="badge bg-success">Confirmada</span>
+                        {% elif r.estado == 'pendiente' %}
+                            <span class="badge bg-warning text-dark">Pendiente</span>
+                        {% elif r.estado == 'cancelada' %}
+                            <span class="badge bg-danger">Cancelada</span>
+                        {% elif r.estado == 'completada' %}
+                            <span class="badge bg-info">Completada</span>
+                        {% else %}
+                            <span class="badge bg-secondary">{{ r.get_estado_display|default:r.estado }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end">
+                        <a href="{% url 'reservas:detalle' r.pk %}" class="btn btn-sm btn-outline-primary" title="Ver detalle">
+                            <i class="bi bi-eye"></i>
+                        </a>
+
+                        {% if r.estado != 'cancelada' and r.estado != 'completada' %}
+                            {% if r.usuario == user or user.perfil.rol == 'admin' or user.perfil.rol == 'operador' %}
+                                <a href="{% url 'reservas:editar' r.pk %}" class="btn btn-sm btn-outline-secondary" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                            {% endif %}
+                        {% endif %}
+
+                        {% if r.estado == 'pendiente' %}
+                            {% if user.perfil.rol == 'admin' or user.perfil.rol == 'operador' %}
+                                <a href="{% url 'reservas:confirmar' r.pk %}" class="btn btn-sm btn-outline-success" title="Confirmar">
+                                    <i class="bi bi-check-lg"></i>
+                                </a>
+                            {% endif %}
+                        {% endif %}
+
+                        {% if r.estado == 'pendiente' or r.estado == 'confirmada' %}
+                            {% if r.usuario == user or user.perfil.rol == 'admin' or user.perfil.rol == 'operador' %}
+                                <a href="{% url 'reservas:cancelar' r.pk %}" class="btn btn-sm btn-outline-danger" title="Cancelar">
+                                    <i class="bi bi-x-lg"></i>
+                                </a>
+                            {% endif %}
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center text-muted py-5">
+                        <i class="bi bi-inbox" style="font-size: 2.5rem;"></i>
+                        <p class="mt-2 mb-0">No se encontraron reservas.</p>
+                        <a href="{% url 'reservas:crear' %}" class="btn btn-primary btn-sm mt-2">
+                            <i class="bi bi-plus-circle"></i> Crear una reserva
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}
