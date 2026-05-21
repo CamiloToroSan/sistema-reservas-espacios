@@ -10,7 +10,8 @@ from .forms import LoginForm, RegistroForm, PerfilForm
 def login_view(request):
     if request.user.is_authenticated:
         return redirect('dashboard:inicio')
-    
+
+    rol = request.GET.get('rol', '').lower()
     if request.method == 'POST':
         form = LoginForm(request, data=request.POST)
         if form.is_valid():
@@ -22,8 +23,8 @@ def login_view(request):
             messages.error(request, 'Usuario o contraseña incorrectos.')
     else:
         form = LoginForm()
-    
-    return render(request, 'usuarios/login.html', {'form': form})
+
+    return render(request, 'usuarios/login.html', {'form': form, 'rol': rol})
 
 
 def registro_view(request):
@@ -47,7 +48,7 @@ def registro_view(request):
 def logout_view(request):
     logout(request)
     messages.info(request, 'Sesión cerrada.')
-    return redirect('usuarios:login')
+    return redirect('index')
 
 
 @login_required

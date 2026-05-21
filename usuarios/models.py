@@ -32,8 +32,9 @@ class Perfil(models.Model):
         verbose_name = 'Perfil'
         verbose_name_plural = 'Perfiles'
 
+# lo comente porque no dejaba crear mas roles desde superusuario
 
-@receiver(post_save, sender=User)
-def crear_perfil_usuario(sender, instance, created, **kwargs):
-    if created:
-        Perfil.objects.create(user=instance)
+# @receiver(post_save, sender=User)
+# def crear_perfil_usuario(sender, instance, created, **kwargs):
+#     if created:
+#         Perfil.objects.get_or_create(user=instance)

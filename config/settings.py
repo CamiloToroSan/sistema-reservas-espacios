@@ -105,7 +105,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Autenticación
 LOGIN_URL = 'usuarios:login'
 LOGIN_REDIRECT_URL = 'dashboard:inicio'
-LOGOUT_REDIRECT_URL = 'usuarios:login'
+LOGOUT_REDIRECT_URL = 'index'
 
 # Email (consola en desarrollo, SMTP real en producción)
 if DEBUG:
