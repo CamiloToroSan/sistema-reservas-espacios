@@ -8,7 +8,7 @@ import json
 from espacios.models import Espacio, TipoEspacio
 from reservas.models import Reserva
 from django.contrib.auth.models import User
-from .reportes import generar_pdf_reservas, generar_excel_reservas
+from .reportes import generar_pdf_reservas, generar_excel_reservas, filtrar_reservas
 from usuarios.decorators import rol_requerido
 
 
@@ -119,10 +119,22 @@ def dashboard_inicio(request):
 def reportes(request):
     """
     Página de reportes con filtros para descargar PDF/Excel.
+    Muestra tabla previa de reservas filtradas antes de descargar.
     Solo accesible por admin.
     """
-    espacios = Espacio.objects.all()
-    return render(request, 'dashboard/reportes.html', {'espacios': espacios})
+    fecha_inicio = request.GET.get('inicio')
+    fecha_fin = request.GET.get('fin')
+    
+    # Obtener reservas filtradas (si se enviaron fechas, si no, todas)
+    reservas = filtrar_reservas(fecha_inicio, fecha_fin)
+    
+    context = {
+        'reservas': reservas,
+        'total_reservas': reservas.count(),
+        'fecha_inicio': fecha_inicio or '',
+        'fecha_fin': fecha_fin or '',
+    }
+    return render(request, 'dashboard/reportes.html', context)
 
 
 @login_required
