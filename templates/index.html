@@ -59,45 +59,6 @@
             padding: 3rem 1rem;
         }
 
-        .steps-col {
-            display: flex;
-            flex-direction: column;
-            gap: 1.25rem;
-        }
-
-        .step-card {
-            background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.12);
-            border-left: 3px solid var(--azul);
-            border-radius: 10px;
-            padding: 1.1rem 1.4rem;
-            backdrop-filter: blur(6px);
-            transition: background 0.25s;
-            animation: slideLeft 0.6s ease both;
-        }
-        .step-card:nth-child(2) { animation-delay: 0.1s; }
-        .step-card:nth-child(3) { animation-delay: 0.2s; }
-        .step-card:hover { background: rgba(255,255,255,0.1); }
-
-        .step-label {
-            font-size: 11px;
-            font-weight: 600;
-            letter-spacing: 0.12em;
-            color: var(--azul);
-            text-transform: uppercase;
-            margin-bottom: 4px;
-        }
-        .step-title {
-            font-size: 15px;
-            font-weight: 600;
-            color: #fff;
-            margin-bottom: 2px;
-        }
-        .step-desc {
-            font-size: 13px;
-            color: rgba(255,255,255,0.55);
-        }
-
         .cta-col {
             animation: slideRight 0.6s ease both;
         }
@@ -163,31 +124,9 @@
         .btn-admin { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.9); border: 1.5px solid rgba(255,255,255,0.2); }
         .btn-admin:hover { background: rgba(255,255,255,0.15); color: #fff; }
 
-        /* ── animaciones ── */
-        @keyframes slideLeft {
-            from { opacity: 0; transform: translateX(-24px); }
-            to   { opacity: 1; transform: translateX(0); }
-        }
         @keyframes slideRight {
             from { opacity: 0; transform: translateX(24px); }
             to   { opacity: 1; transform: translateX(0); }
-        }
-
-        .divider-text {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin: 0.5rem 0 1rem;
-            color: rgba(255,255,255,0.3);
-            font-size: 12px;
-            letter-spacing: 0.08em;
-        }
-        .divider-text::before,
-        .divider-text::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: rgba(255,255,255,0.12);
         }
 
         .login-link {
@@ -202,43 +141,6 @@
             font-weight: 600;
         }
         .login-link a:hover { text-decoration: underline; }
-
-        /* ── logo / marca ── */
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 3rem;
-        }
-        .brand-icon {
-            width: 42px; height: 42px;
-            background: var(--azul);
-            border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.3rem; color: #fff;
-            flex-shrink: 0;
-        }
-        .brand-name {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.05rem;
-            color: #fff;
-            line-height: 1.2;
-        }
-        .brand-name small {
-            display: block;
-            font-family: 'DM Sans', sans-serif;
-            font-size: 11px;
-            color: rgba(255,255,255,0.45);
-            font-weight: 400;
-        }
-
-        @media (min-width: 768px) {
-            .steps-col {
-                padding-right: 3rem;
-                border-right: 1px solid rgba(255,255,255,0.1);
-            }
-            .cta-col { padding-left: 3rem; }
-        }
     </style>
 </head>
 <body>
@@ -246,47 +148,9 @@
 <section class="hero">
     <div class="hero-inner">
         <div class="container">
-
-            <!-- marca superior -->
-            <div class="brand">
-                <div class="brand-icon">
-                    <i class="bi bi-calendar-check"></i>
-                </div>
-                <div class="brand-name">
-                    Sistema de Reservas
-                    <small>Gestión de Espacios Institucionales</small>
-                </div>
-            </div>
-
-            <div class="row align-items-center">
-
-                <div class="col-md-5 col-lg-4 mb-5 mb-md-0">
-                    <div class="steps-col">
-
-                        <div class="step-card">
-                            <p class="step-label">Paso 1</p>
-                            <p class="step-title">Elige tu perfil</p>
-                            <p class="step-desc">Estudiante, docente u operador administrativo.</p>
-                        </div>
-
-                        <div class="step-card">
-                            <p class="step-label">Paso 2</p>
-                            <p class="step-title">Inicia sesión</p>
-                            <p class="step-desc">Accede con tus credenciales y los permisos correctos.</p>
-                        </div>
-
-                        <div class="step-card">
-                            <p class="step-label">Paso 3</p>
-                            <p class="step-title">Gestiona espacios</p>
-                            <p class="step-desc">Reserva aulas, laboratorios y salas institucionales.</p>
-                        </div>
-
-                    </div>
-                </div>
-
-                <div class="col-md-7 col-lg-8">
+            <div class="row justify-content-center">
+                <div class="col-md-8 col-lg-6 text-center">
                     <div class="cta-col">
-
                         <span class="badge-pill">
                             <i class="bi bi-building me-1"></i>
                             Reservas · Espacios · Reportes
@@ -302,7 +166,6 @@
                             acceso personalizado a los espacios y funciones.
                         </p>
 
-                        <!-- botones de rol -->
                         <a href="{% url 'usuarios:login' %}?rol=estudiante" class="btn-rol btn-estudiante">
                             <i class="bi bi-person-badge"></i>
                             Ingresar como Estudiante
@@ -322,10 +185,8 @@
                             ¿Problemas para acceder?
                             <a href="mailto:soporte@reservas.edu.co">Contacta soporte</a>
                         </div>
-
                     </div>
                 </div>
-
             </div>
         </div>
     </div>

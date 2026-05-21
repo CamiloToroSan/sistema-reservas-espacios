@@ -7,7 +7,7 @@
 <div class="row justify-content-center">
     <div class="col-md-7">
         <div class="card">
-            <div class="card-header bg-primary text-white">
+            <div class="card-header text-white" style="background: #0D6EFD; border-radius: 30px 30px 0 0;">
                 <h4 class="mb-0"><i class="bi bi-person-plus"></i> Crear cuenta</h4>
             </div>
             <div class="card-body p-4">
@@ -17,54 +17,52 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Usuario</label>
-                            {{ form.username }}
+                            {{ form.username|add_class:"form-control" }}
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Correo</label>
-                            {{ form.email }}
+                            {{ form.email|add_class:"form-control" }}
                         </div>
                     </div>
                     
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Nombres</label>
-                            {{ form.first_name }}
+                            {{ form.first_name|add_class:"form-control" }}
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Apellidos</label>
-                            {{ form.last_name }}
+                            {{ form.last_name|add_class:"form-control" }}
                         </div>
                     </div>
                     
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Documento</label>
-                            {{ form.documento }}
+                            {{ form.documento|add_class:"form-control" }}
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Teléfono</label>
-                            {{ form.telefono }}
+                            {{ form.telefono|add_class:"form-control" }}
                         </div>
                     </div>
                     
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Contraseña</label>
-                            {{ form.password1 }}
+                            {{ form.password1|add_class:"form-control" }}
                             <small class="text-muted">Mínimo 8 caracteres, no solo números.</small>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Confirmar contraseña</label>
-                            {{ form.password2 }}
+                            {{ form.password2|add_class:"form-control" }}
                         </div>
                     </div>
                     
                     {% if form.errors %}
                         <div class="alert alert-danger">
                             {% for field, errors in form.errors.items %}
-                                {% for error in errors %}
-                                    <div>{{ error }}</div>
-                                {% endfor %}
+                                {% for error in errors %}<div>{{ error }}</div>{% endfor %}
                             {% endfor %}
                         </div>
                     {% endif %}
@@ -74,9 +72,9 @@
                     </button>
                 </form>
                 
-                <hr>
+                <hr style="border-color: rgba(255,255,255,0.12);">
                 <p class="text-center mb-0">
-                    ¿Ya tienes cuenta? <a href="{% url 'usuarios:login' %}">Inicia sesión</a>
+                    ¿Ya tienes cuenta? <a href="{% url 'usuarios:login' %}" style="color: #0D6EFD;">Inicia sesión</a>
                 </p>
             </div>
         </div>
