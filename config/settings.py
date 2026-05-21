@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+from django.contrib.auth.models import User
 
 # Cargar variables del archivo .env (solo desarrollo)
 load_dotenv()
@@ -131,3 +132,10 @@ if not DEBUG:
     CSRF_COOKIE_SECURE = True
     CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com']
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+if not User.objects.filter(username='admin').exists():
+    User.objects.create_superuser(
+        'admin',
+        'admin@gmail.com',
+        'admin2026'
+    )
